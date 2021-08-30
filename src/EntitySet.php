@@ -56,6 +56,7 @@ use Flat3\Lodata\Traits\HasTransaction;
 use Flat3\Lodata\Traits\UseReferences;
 use Flat3\Lodata\Transaction\MetadataContainer;
 use Flat3\Lodata\Transaction\Option;
+use Flat3\Lodata\Type\Collection;
 use Flat3\Lodata\Type\Stream;
 use Generator;
 use Illuminate\Http\Request;
@@ -165,12 +166,12 @@ abstract class EntitySet implements EntityTypeInterface, ReferenceInterface, Ide
 
     /**
      * Generate a new entity set definition
-     * @param  string  $name  Entity set name
-     * @param  EntityType  $entityType  Entity type
+     * @param  string|null  $name  Entity set name
+     * @param  EntityType|null  $entityType  Entity type
      * @return static Entity set definition
      * @codeCoverageIgnore
      */
-    public static function factory(string $name, EntityType $entityType): self
+    public static function factory(?string $name = null, ?EntityType $entityType = null): self
     {
         /** @phpstan-ignore-next-line */
         return new static($name, $entityType);

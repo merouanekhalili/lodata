@@ -10,6 +10,7 @@ use Flat3\Lodata\Annotation\Core\V1\Immutable;
 use Flat3\Lodata\Controller\Transaction;
 use Flat3\Lodata\Helper\Constants;
 use Flat3\Lodata\Helper\Identifier;
+use Flat3\Lodata\Helper\ObjectArray;
 use Flat3\Lodata\Helper\Properties;
 use Flat3\Lodata\Interfaces\AnnotationInterface;
 use Flat3\Lodata\Interfaces\ContextInterface;
@@ -89,6 +90,18 @@ class ComplexType extends Type implements ResourceInterface, ContextInterface, I
     public function addDeclaredProperty($name, Type $type): self
     {
         $this->addProperty(new DeclaredProperty($name, $type));
+        return $this;
+    }
+
+    /**
+     * Create and add a dynamic property
+     * @param  Identifier|string  $name  Property name
+     * @param  Type  $type  Property type
+     * @return $this
+     */
+    public function addDynamicProperty($name, Type $type): self
+    {
+        $this->addProperty(new DynamicProperty($name, $type));
         return $this;
     }
 
@@ -204,8 +217,12 @@ class ComplexType extends Type implements ResourceInterface, ContextInterface, I
         $instance = new ComplexValue();
         $instance->setType($this);
 
-        if ($value instanceof ArrayAccess) {
+        if (is_array($value) || $value instanceof ArrayAccess) {
             foreach ($value as $k => $v) {
+                if (is_numeric($k)) {
+                    continue;
+                }
+
                 $instance[$k] = $v;
             }
         }

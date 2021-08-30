@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Flat3\Lodata\Drivers;
 
+use Flat3\Lodata\ComplexValue;
 use Flat3\Lodata\Entity;
 use Flat3\Lodata\Helper\PropertyValue;
 use Flat3\Lodata\Helper\PropertyValues;
@@ -85,7 +86,14 @@ class CollectionEntitySet extends EnumerableEntitySet implements CreateInterface
         $entity = $this->read($key);
 
         foreach ($propertyValues as $propertyValue) {
-            $entity->addPropertyValue($propertyValue);
+            $property = $propertyValue->getProperty();
+            $value = $propertyValue->getValue();
+            
+            if ($value instanceof ComplexValue) {
+                $entity[$property->getName()] = $value->toArray();
+            } else {
+                $entity[$property->getName()] = $value->get();
+            }
         }
 
         $item = $entity->toArray();
