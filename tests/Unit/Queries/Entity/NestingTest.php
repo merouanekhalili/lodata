@@ -88,4 +88,18 @@ class NestingTest extends TestCase
 
         $this->assertMatchesSnapshot(Lodata::getEntitySet('atest')->getCollection());
     }
+
+    public function test_update_nested_complex()
+    {
+        $this->assertJsonResponse(
+            Request::factory()
+                ->patch()
+                ->body([
+                    'd' => 'q',
+                ])
+                ->path('atest/0/c')
+        );
+
+        $this->assertMatchesSnapshot(Lodata::getEntitySet('atest')->getCollection());
+    }
 }
