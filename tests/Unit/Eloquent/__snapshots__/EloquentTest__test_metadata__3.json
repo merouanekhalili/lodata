@@ -64,12 +64,6 @@
                 "ContentIDSupported": true
             }
         },
-        "op1Import": {
-            "$Function": "com.example.odata.op1"
-        },
-        "op2Import": {
-            "$Function": "com.example.odata.op2"
-        },
         "Flights": {
             "$EntityType": "com.example.odata.Flight",
             "$NavigationPropertyBinding": {
@@ -410,32 +404,6 @@
             "$Type": "com.example.odata.Airport",
             "$Nullable": true,
             "$ReferentialConstraint": {}
-        }
-    },
-    "op1": {
-        "$Kind": "Function",
-        "$IsBound": false,
-        "$Parameter": [],
-        "$ReturnType": {
-            "$Collection": false,
-            "$Type": "Edm.String",
-            "$Nullable": true
-        }
-    },
-    "op2": {
-        "$Kind": "Function",
-        "$IsBound": false,
-        "$Parameter": [
-            {
-                "$Name": "prefix",
-                "$Nullable": false,
-                "$Type": "Edm.String"
-            }
-        ],
-        "$ReturnType": {
-            "$Collection": false,
-            "$Type": "Edm.String",
-            "$Nullable": false
         }
     }
 }

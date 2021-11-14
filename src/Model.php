@@ -290,7 +290,6 @@ class Model implements AnnotationInterface
         $set = new EloquentEntitySet($model);
         $this->add($set);
         $set->discoverProperties();
-        $this->discoverOperations($model);
 
         return $set;
     }
@@ -300,6 +299,10 @@ class Model implements AnnotationInterface
         $class = new ReflectionClass($object);
 
         foreach ($class->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            if (!method_exists($method, 'getAttributes')) {
+                continue;
+            }
+
             foreach ($method->getAttributes(LodataOperation::class, ReflectionAttribute::IS_INSTANCEOF) as $attribute) {
                 $this->add($attribute->newInstance()->toOperation($object, $method->getName()));
             }

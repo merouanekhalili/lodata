@@ -14,6 +14,10 @@ class DiscoveryTest extends TestCase
     {
         parent::setUp();
 
+        if (PHP_VERSION_ID < 80000) {
+            $this->markTestSkipped();
+        }
+
         Lodata::discoverEloquentModel(Flight::class);
         Lodata::discoverOperations(Service::class);
     }
