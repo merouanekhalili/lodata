@@ -7,6 +7,7 @@ namespace Flat3\Lodata\Operation;
 use Flat3\Lodata\Exception\Internal\LexerException;
 use Flat3\Lodata\Exception\Protocol\BadRequestException;
 use Flat3\Lodata\Expression\Lexer;
+use Flat3\Lodata\Helper\PropertyValue;
 use Flat3\Lodata\Interfaces\Operation\ArgumentInterface;
 use Flat3\Lodata\Primitive;
 use Flat3\Lodata\PrimitiveType;
@@ -25,6 +26,10 @@ class PrimitiveArgument extends Argument
      */
     public function generate($source = null): ArgumentInterface
     {
+        if ($source instanceof Primitive) {
+            return $source;
+        }
+
         $lexer = new Lexer((string) $source);
 
         $type = $this->getType();
@@ -72,5 +77,17 @@ class PrimitiveArgument extends Argument
         /** @var ReflectionNamedType $type */
         $type = $this->parameter->getType();
         return new PrimitiveType($type->getName());
+    }
+
+    public function assertValidParameter($parameter): void
+    {
+        if ($parameter instanceof Primitive || $parameter instanceof PropertyValue) {
+            return;
+        }
+
+        throw new BadRequestException(
+            'invalid_bound_argument_type',
+            'The provided bound argument was not of the correct type for this function'
+        );
     }
 }

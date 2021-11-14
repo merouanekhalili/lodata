@@ -7,6 +7,7 @@ namespace Flat3\Lodata\Operation;
 use Flat3\Lodata\Controller\Transaction;
 use Flat3\Lodata\EntitySet;
 use Flat3\Lodata\EntityType;
+use Flat3\Lodata\Exception\Protocol\BadRequestException;
 use Flat3\Lodata\Exception\Protocol\InternalServerErrorException;
 use Flat3\Lodata\Facades\Lodata;
 use Flat3\Lodata\Interfaces\Operation\ArgumentInterface;
@@ -53,5 +54,17 @@ class EntitySetArgument extends Argument
     {
         $reflectedSet = $this->parameter->getName();
         return Lodata::getEntitySet($reflectedSet)->getType();
+    }
+
+    public function assertValidParameter($parameter): void
+    {
+        if ($parameter instanceof EntitySet) {
+            return;
+        }
+
+        throw new BadRequestException(
+            'invalid_bound_argument_type',
+            'The provided bound argument was not of the correct type for this function'
+        );
     }
 }

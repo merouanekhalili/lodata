@@ -772,4 +772,24 @@ class EloquentTest extends TestCase
                 ->query('$skip', '2')
         );
     }
+
+    public function test_op1()
+    {
+        $this->withFlightData();
+
+        $this->assertJsonResponse(
+            (new Request)
+                ->path('/Airports/1/op1')
+        );
+    }
+
+    public function test_op2()
+    {
+        $this->withFlightData();
+
+        $this->assertJsonResponse(
+            (new Request)
+                ->path("/Airports/1/op2(prefix='o')")
+        );
+    }
 }

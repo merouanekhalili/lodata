@@ -20,8 +20,8 @@ class LodataServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        \Lodata::discoverEloquentModel(\App\Models\Flight::class);
-        \Lodata::discoverEloquentModel(\App\Models\Passenger::class);
+        \Lodata::discover(\App\Models\Flight::class);
+        \Lodata::discover(\App\Models\Passenger::class);
     }
 }
 ```

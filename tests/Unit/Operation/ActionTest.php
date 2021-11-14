@@ -7,7 +7,6 @@ use Flat3\Lodata\Controller\Transaction;
 use Flat3\Lodata\Entity;
 use Flat3\Lodata\EntitySet;
 use Flat3\Lodata\Facades\Lodata;
-use Flat3\Lodata\Interfaces\Operation\ActionInterface;
 use Flat3\Lodata\Operation;
 use Flat3\Lodata\Tests\Request;
 use Flat3\Lodata\Tests\TestCase;
@@ -18,12 +17,11 @@ class ActionTest extends TestCase
 {
     public function test_get_not_allowed()
     {
-        Lodata::add(new class('exa1') extends Operation implements ActionInterface {
-            public function invoke(): String_
-            {
-                return new String_('hello');
-            }
+        $exa1 = new Operation\Action('exa1');
+        $exa1->setCallable(function (): String_ {
+            return new String_('hello');
         });
+        Lodata::add($exa1);
 
         $this->assertMethodNotAllowed(
             (new Request)
@@ -33,12 +31,11 @@ class ActionTest extends TestCase
 
     public function test_callback()
     {
-        Lodata::add(new class('exa1') extends Operation implements ActionInterface {
-            public function invoke(): String_
-            {
-                return new String_('hello');
-            }
+        $exa1 = new Operation\Action('exa1');
+        $exa1->setCallable(function (): String_ {
+            return new String_('hello');
         });
+        Lodata::add($exa1);
 
         $this->assertJsonResponse(
             (new Request)
@@ -49,12 +46,11 @@ class ActionTest extends TestCase
 
     public function test_service_document()
     {
-        Lodata::add(new class('exa1') extends Operation implements ActionInterface {
-            public function invoke(): String_
-            {
-                return new String_('hello');
-            }
+        $exa1 = new Operation\Action('exa1');
+        $exa1->setCallable(function (): String_ {
+            return new String_('hello');
         });
+        Lodata::add($exa1);
 
         $this->assertJsonResponse(
             (new Request)
@@ -71,12 +67,11 @@ class ActionTest extends TestCase
 
     public function test_no_composition()
     {
-        Lodata::add(new class('textv1') extends Operation implements ActionInterface {
-            public function invoke(): Int32
-            {
-                return new Int32(3);
-            }
+        $textv1 = new Operation\Action('textv1');
+        $textv1->setCallable(function (): Int32 {
+            return new Int32(3);
         });
+        Lodata::add($textv1);
 
         $this->assertBadRequest(
             (new Request)
@@ -87,12 +82,10 @@ class ActionTest extends TestCase
 
     public function test_void_callback()
     {
-        Lodata::add(new class('textv1') extends Operation implements ActionInterface {
-            public function invoke(): void
-            {
-
-            }
+        $textv1 = new Operation\Action('textv1');
+        $textv1->setCallable(function (): void {
         });
+        Lodata::add($textv1);
 
         $this->assertNoContent(
             (new Request)
@@ -103,13 +96,10 @@ class ActionTest extends TestCase
 
     public function test_default_null_callback()
     {
-        Lodata::add(new class('textv1') extends Operation implements ActionInterface {
-            public function invoke()
-            {
-
-            }
+        $textv1 = new Operation\Action('textv1');
+        $textv1->setCallable(function () {
         });
-
+        Lodata::add($textv1);
 
         $this->assertNoContent(
             (new Request)
@@ -120,12 +110,11 @@ class ActionTest extends TestCase
 
     public function test_explicit_null_callback()
     {
-        Lodata::add(new class('textv1') extends Operation implements ActionInterface {
-            public function invoke()
-            {
-                return null;
-            }
+        $textv1 = new Operation\Action('textv1');
+        $textv1->setCallable(function () {
+            return null;
         });
+        Lodata::add($textv1);
 
         $this->assertNoContent(
             (new Request)
@@ -138,12 +127,13 @@ class ActionTest extends TestCase
     {
         $this->withFlightModel();
 
-        Lodata::add((new class('aa1') extends Operation implements ActionInterface {
-            public function invoke(Entity $airport): Entity
-            {
-                return $airport;
-            }
-        })->setBindingParameterName('airport')->setReturnType(Lodata::getEntityType('airport')));
+        $aa1 = new Operation\Action('aa1');
+        $aa1->setCallable(function (Entity $airport): Entity {
+            return $airport;
+        });
+        $aa1->setBindingParameterName('airport');
+        $aa1->setReturnType(Lodata::getEntityType('airport'));
+        Lodata::add($aa1);
 
         $this->assertJsonResponse(
             (new Request)
@@ -156,17 +146,17 @@ class ActionTest extends TestCase
     {
         $this->withFlightModel();
 
-        Lodata::add((new class('aa1') extends Operation implements ActionInterface {
-            public function invoke(EntitySet $airports, Transaction $transaction): Entity
-            {
-                $transaction->getResponse()->setStatusCode(Response::HTTP_CREATED);
+        $aa1 = new Operation\Action('aa1');
+        $aa1->setCallable(function (EntitySet $airports, Transaction $transaction): Entity {
+            $transaction->getResponse()->setStatusCode(Response::HTTP_CREATED);
 
-                $entity = $airports->newEntity();
-                $entity->setEntityId(4);
+            $entity = $airports->newEntity();
+            $entity->setEntityId(4);
 
-                return $entity;
-            }
-        })->setReturnType(Lodata::getEntityType('airport')));
+            return $entity;
+        });
+        $aa1->setReturnType(Lodata::getEntityType('airport'));
+        Lodata::add($aa1);
 
         $this->assertJsonResponse(
             (new Request)
@@ -178,12 +168,11 @@ class ActionTest extends TestCase
 
     public function test_parameters()
     {
-        Lodata::add(new class('aa1') extends Operation implements ActionInterface {
-            public function invoke(Int32 $a, Int32 $b): Int32
-            {
-                return new Int32($a->get() + $b->get());
-            }
+        $aa1 = new Operation\Action('aa1');
+        $aa1->setCallable(function (Int32 $a, Int32 $b): Int32 {
+            return new Int32($a->get() + $b->get());
         });
+        Lodata::add($aa1);
 
         $this->assertJsonResponse(
             (new Request)
@@ -198,12 +187,11 @@ class ActionTest extends TestCase
 
     public function test_prefers_no_results()
     {
-        Lodata::add(new class('aa1') extends Operation implements ActionInterface {
-            public function invoke(): Int32
-            {
-                return new Int32(99);
-            }
+        $aa1 = new Operation\Action('aa1');
+        $aa1->setCallable(function (): Int32 {
+            return new Int32(99);
         });
+        Lodata::add($aa1);
 
         $this->assertNoContent(
             (new Request)
@@ -219,12 +207,11 @@ class ActionTest extends TestCase
 
     public function test_parameters_invalid_body_string()
     {
-        Lodata::add(new class('aa1') extends Operation implements ActionInterface {
-            public function invoke(Int32 $a, Int32 $b): Int32
-            {
-                return new Int32($a->get() + $b->get());
-            }
+        $aa1 = new Operation\Action('aa1');
+        $aa1->setCallable(function (Int32 $a, Int32 $b): Int32 {
+            return new Int32($a->get() + $b->get());
         });
+        Lodata::add($aa1);
 
         $this->assertNotAcceptable(
             (new Request)
@@ -238,12 +225,11 @@ class ActionTest extends TestCase
     {
         $this->withFlightModel();
 
-        Lodata::add(new class('aa1') extends Operation implements ActionInterface {
-            public function invoke(Int32 $a, Int32 $b): Int32
-            {
-                return new Int32($a->get() + $b->get());
-            }
+        $aa1 = new Operation\Action('aa1');
+        $aa1->setCallable(function (Int32 $a, Int32 $b): Int32 {
+            return new Int32($a->get() + $b->get());
         });
+        Lodata::add($aa1);
 
         $this->assertBadRequest(
             (new Request)
@@ -256,12 +242,11 @@ class ActionTest extends TestCase
 
     public function test_null_typed_callback()
     {
-        Lodata::add(new class('booleanv1') extends Operation implements ActionInterface {
-            public function invoke(): ?bool
-            {
-                return null;
-            }
+        $booleanv1 = new Operation\Action('booleanv1');
+        $booleanv1->setCallable(function (): ?bool {
+            return null;
         });
+        Lodata::add($booleanv1);
 
         $this->assertMetadataDocuments();
 

@@ -13,7 +13,7 @@ use TypeError;
  * Type Argument
  * @package Flat3\Lodata\Operation
  */
-class TypeArgument extends PrimitiveArgument
+class ValueArgument extends PrimitiveArgument
 {
     /**
      * Get the type of this primitive

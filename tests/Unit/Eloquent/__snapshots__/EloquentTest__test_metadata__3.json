@@ -58,7 +58,17 @@
             "@Org.OData.Capabilities.V1.IndexableByKey": true,
             "@Org.OData.Capabilities.V1.SelectSupport": {
                 "Supported": true
+            },
+            "@Org.OData.Capabilities.V1.DeepInsertSupport": {
+                "Supported": true,
+                "ContentIDSupported": true
             }
+        },
+        "op1Import": {
+            "$Function": "com.example.odata.op1"
+        },
+        "op2Import": {
+            "$Function": "com.example.odata.op2"
         },
         "Flights": {
             "$EntityType": "com.example.odata.Flight",
@@ -100,6 +110,10 @@
             "@Org.OData.Capabilities.V1.IndexableByKey": true,
             "@Org.OData.Capabilities.V1.SelectSupport": {
                 "Supported": true
+            },
+            "@Org.OData.Capabilities.V1.DeepInsertSupport": {
+                "Supported": true,
+                "ContentIDSupported": true
             }
         },
         "Countries": {
@@ -140,6 +154,10 @@
             "@Org.OData.Capabilities.V1.IndexableByKey": true,
             "@Org.OData.Capabilities.V1.SelectSupport": {
                 "Supported": true
+            },
+            "@Org.OData.Capabilities.V1.DeepInsertSupport": {
+                "Supported": true,
+                "ContentIDSupported": true
             }
         },
         "Passengers": {
@@ -182,6 +200,10 @@
             "@Org.OData.Capabilities.V1.IndexableByKey": true,
             "@Org.OData.Capabilities.V1.SelectSupport": {
                 "Supported": true
+            },
+            "@Org.OData.Capabilities.V1.DeepInsertSupport": {
+                "Supported": true,
+                "ContentIDSupported": true
             }
         },
         "$Annotations": {
@@ -388,6 +410,32 @@
             "$Type": "com.example.odata.Airport",
             "$Nullable": true,
             "$ReferentialConstraint": {}
+        }
+    },
+    "op1": {
+        "$Kind": "Function",
+        "$IsBound": false,
+        "$Parameter": [],
+        "$ReturnType": {
+            "$Collection": false,
+            "$Type": "Edm.String",
+            "$Nullable": true
+        }
+    },
+    "op2": {
+        "$Kind": "Function",
+        "$IsBound": false,
+        "$Parameter": [
+            {
+                "$Name": "prefix",
+                "$Nullable": false,
+                "$Type": "Edm.String"
+            }
+        ],
+        "$ReturnType": {
+            "$Collection": false,
+            "$Type": "Edm.String",
+            "$Nullable": false
         }
     }
 }

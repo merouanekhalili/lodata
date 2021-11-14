@@ -7,6 +7,7 @@ namespace Flat3\Lodata;
 use Flat3\Lodata\Annotation\Capabilities;
 use Flat3\Lodata\Annotation\Core;
 use Flat3\Lodata\Annotation\Reference;
+use Flat3\Lodata\Attributes\LodataOperation;
 use Flat3\Lodata\Drivers\EloquentEntitySet;
 use Flat3\Lodata\Helper\ObjectArray;
 use Flat3\Lodata\Helper\References;
@@ -17,6 +18,9 @@ use Flat3\Lodata\Interfaces\Operation\FunctionInterface;
 use Flat3\Lodata\Interfaces\ResourceInterface;
 use Flat3\Lodata\Interfaces\ServiceInterface;
 use Flat3\Lodata\Traits\HasAnnotations;
+use ReflectionAttribute;
+use ReflectionClass;
+use ReflectionMethod;
 
 /**
  * Model
@@ -278,12 +282,30 @@ class Model implements AnnotationInterface
 
     /**
      * Discover the Eloquent model provided as a class name
-     * @param  string  $class  Eloquent model class name
+     * @param  string  $model  Eloquent model class name
      * @return EloquentEntitySet Eloquent entity set
      */
-    public function discoverEloquentModel(string $class): EloquentEntitySet
+    public function discoverEloquentModel(string $model): EloquentEntitySet
     {
-        return EloquentEntitySet::discover($class);
+        $set = new EloquentEntitySet($model);
+        $this->add($set);
+        $set->discoverProperties();
+        $this->discoverOperations($model);
+
+        return $set;
+    }
+
+    public function discoverOperations(string $object): self
+    {
+        $class = new ReflectionClass($object);
+
+        foreach ($class->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            foreach ($method->getAttributes(LodataOperation::class, ReflectionAttribute::IS_INSTANCEOF) as $attribute) {
+                $this->add($attribute->newInstance()->toOperation($object, $method->getName()));
+            }
+        }
+
+        return $this;
     }
 
     /**

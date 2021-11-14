@@ -7,7 +7,6 @@ use Flat3\Lodata\Drivers\StaticEntitySet;
 use Flat3\Lodata\Entity;
 use Flat3\Lodata\EntitySet;
 use Flat3\Lodata\Facades\Lodata;
-use Flat3\Lodata\Interfaces\Operation\FunctionInterface;
 use Flat3\Lodata\Operation;
 use Flat3\Lodata\Tests\Data\Airport;
 use Flat3\Lodata\Tests\Request;
@@ -19,12 +18,11 @@ class FunctionTest extends TestCase
 {
     public function test_callback()
     {
-        Lodata::add(new class('exf1') extends Operation implements FunctionInterface {
-            function invoke(): String_
-            {
-                return new String_('hello');
-            }
+        $op = new Operation\Function_('exf1');
+        $op->setCallable(function (): String_ {
+            return new String_('hello');
         });
+        Lodata::add($op);
 
         $this->assertJsonResponse(
             (new Request)
@@ -34,12 +32,11 @@ class FunctionTest extends TestCase
 
     public function test_callback_no_parentheses()
     {
-        Lodata::add(new class('exf1') extends Operation implements FunctionInterface {
-            function invoke(): String_
-            {
-                return new String_('hello');
-            }
+        $op = new Operation\Function_('exf1');
+        $op->setCallable(function (): String_ {
+            return new String_('hello');
         });
+        Lodata::add($op);
 
         $this->assertJsonResponse(
             (new Request)
@@ -49,12 +46,11 @@ class FunctionTest extends TestCase
 
     public function test_service_document()
     {
-        Lodata::add(new class('exf1') extends Operation implements FunctionInterface {
-            function invoke(): String_
-            {
-                return new String_('hello');
-            }
+        $op = new Operation\Function_('exf1');
+        $op->setCallable(function (): String_ {
+            return new String_('hello');
         });
+        Lodata::add($op);
 
         $this->assertJsonResponse(
             (new Request)
@@ -64,16 +60,15 @@ class FunctionTest extends TestCase
     public function test_callback_entity()
     {
         $this->withFlightModel();
-
-        Lodata::add((new class('exf3') extends Operation implements FunctionInterface {
-            function invoke(String_ $code): Entity
-            {
-                $airport = new Airport();
-                $airport->setType(Lodata::getEntityType('airport'));
-                $airport['code'] = $code->get();
-                return $airport;
-            }
-        })->setReturnType(Lodata::getEntityType('airport')));
+        $op = new Operation\Function_('exf3');
+        $op->setCallable(function (String_ $code): Entity {
+            $airport = new Airport();
+            $airport->setType(Lodata::getEntityType('airport'));
+            $airport['code'] = $code->get();
+            return $airport;
+        });
+        $op->setReturnType(Lodata::getEntityType('airport'));
+        Lodata::add($op);
 
         $this->assertJsonResponse(
             (new Request)
@@ -85,12 +80,12 @@ class FunctionTest extends TestCase
     {
         $this->withTextModel();
 
-        Lodata::add((new class('textf1') extends Operation implements FunctionInterface {
-            public function invoke(EntitySet $texts): EntitySet
-            {
-                return $texts;
-            }
-        })->setReturnType(Lodata::getEntityType('text')));
+        $op = new Operation\Function_('textf1');
+        $op->setCallable(function (EntitySet $texts): EntitySet {
+            return $texts;
+        });
+        $op->setReturnType(Lodata::getEntityType('text'));
+        Lodata::add($op);
 
         $this->assertJsonResponse(
             (new Request)
@@ -172,12 +167,11 @@ class FunctionTest extends TestCase
 
     public function test_with_implicit_parameter_alias_matching_system_query_option()
     {
-        Lodata::add(new class('add') extends Operation implements FunctionInterface {
-            public function invoke(Int32 $apply, Int32 $compute): Int32
-            {
-                return new Int32($apply->get() + $compute->get());
-            }
+        $add = new Operation\Function_('add');
+        $add->setCallable(function (Int32 $apply, Int32 $compute): Int32 {
+            return new Int32($apply->get() + $compute->get());
         });
+        Lodata::add($add);
 
         $this->assertJsonResponse(
             (new Request)
@@ -189,19 +183,18 @@ class FunctionTest extends TestCase
 
     public function test_function_composition()
     {
-        Lodata::add(new class('identity') extends Operation implements FunctionInterface {
-            public function invoke(Int32 $i): Int32
-            {
-                return new Int32($i->get());
-            }
+        $identity = new Operation\Function_('identity');
+        $identity->setCallable(function (Int32 $i): Int32 {
+            return new Int32($i->get());
         });
+        Lodata::add($identity);
 
-        Lodata::add((new class('increment') extends Operation implements FunctionInterface {
-            public function invoke(Int32 $i): Int32
-            {
-                return new Int32($i->get() + 1);
-            }
-        })->setBindingParameterName('i'));
+        $increment = new Operation\Function_('increment');
+        $increment->setCallable(function (Int32 $i): Int32 {
+            return new Int32($i->get() + 1);
+        });
+        $increment->setBindingParameterName('i');
+        Lodata::add($increment);
 
         $this->assertJsonResponse(
             (new Request)
@@ -213,13 +206,13 @@ class FunctionTest extends TestCase
     {
         $this->withFlightModel();
 
-        Lodata::add((new class('ffn1') extends Operation implements FunctionInterface {
-            public function invoke(Transaction $transaction, EntitySet $flights): EntitySet
-            {
-                $transaction->getSelect()->setValue('origin');
-                return $flights;
-            }
-        })->setReturnType(Lodata::getEntityType('flight')));
+        $ffn1 = new Operation\Function_('ffn1');
+        $ffn1->setCallable(function (Transaction $transaction, EntitySet $flights): EntitySet {
+            $transaction->getSelect()->setValue('origin');
+            return $flights;
+        });
+        $ffn1->setReturnType(Lodata::getEntityType('flight'));
+        Lodata::add($ffn1);
 
         $this->assertJsonResponse(
             (new Request)
@@ -231,12 +224,13 @@ class FunctionTest extends TestCase
     {
         $this->withFlightModel();
 
-        Lodata::add((new class('ffb1') extends Operation implements FunctionInterface {
-            public function invoke(EntitySet $flights): EntitySet
-            {
-                return $flights;
-            }
-        })->setBindingParameterName('flights')->setReturnType(Lodata::getEntityType('flight')));
+        $ffb1 = new Operation\Function_('ffb1');
+        $ffb1->setCallable(function (EntitySet $flights): EntitySet {
+            return $flights;
+        });
+        $ffb1->setBindingParameterName('flights');
+        $ffb1->setReturnType(Lodata::getEntityType('flight'));
+        Lodata::add($ffb1);
 
         $this->assertJsonResponse(
             (new Request)
@@ -248,23 +242,25 @@ class FunctionTest extends TestCase
     {
         $this->withFlightModel();
 
-        Lodata::add((new class('sorter') extends Operation implements FunctionInterface {
-            public function invoke(String_ $field, EntitySet $airports): EntitySet
-            {
-                $result = new StaticEntitySet($airports->getType());
-                $result->setIdentifier($airports->getIdentifier());
+        $sorter = new Operation\Function_('sorter');
+        $sorter->setCallable(function (String_ $field, EntitySet $airports): EntitySet {
+            $result = new StaticEntitySet($airports->getType());
+            $result->setIdentifier($airports->getIdentifier());
 
-                foreach ($airports->query() as $airport) {
-                    $result[] = $airport;
-                }
-
-                $result->sort(function (Entity $a1, Entity $a2) use ($field) {
-                    return $a1[$field->get()]->getPrimitiveValue() <=> $a2[$field->get()]->getPrimitiveValue();
-                });
-
-                return $result;
+            foreach ($airports->query() as $airport) {
+                $result[] = $airport;
             }
-        })->setBindingParameterName('airports')->setReturnType(Lodata::getEntityType('airport')));
+
+            $result->sort(function (Entity $a1, Entity $a2) use ($field) {
+                return $a1[$field->get()]->getPrimitiveValue() <=> $a2[$field->get()]->getPrimitiveValue();
+            });
+
+            return $result;
+        });
+
+        $sorter->setBindingParameterName('airports');
+        $sorter->setReturnType(Lodata::getEntityType('airport'));
+        Lodata::add($sorter);
 
         $this->assertJsonResponse(
             (new Request)
@@ -276,12 +272,13 @@ class FunctionTest extends TestCase
     {
         $this->withFlightModel();
 
-        Lodata::add((new class('ffb1') extends Operation implements FunctionInterface {
-            public function invoke(Entity $flight): Entity
-            {
-                return $flight;
-            }
-        })->setBindingParameterName('flight')->setReturnType(Lodata::getEntityType('flight')));
+        $ffb1 = new Operation\Function_('ffb1');
+        $ffb1->setCallable(function (Entity $flight): Entity {
+            return $flight;
+        });
+        $ffb1->setBindingParameterName('flight');
+        $ffb1->setReturnType(Lodata::getEntityType('flight'));
+        Lodata::add($ffb1);
 
         $this->assertJsonResponse(
             (new Request)
@@ -293,12 +290,12 @@ class FunctionTest extends TestCase
     {
         $this->withFlightModel();
 
-        Lodata::add((new class('ffb1') extends Operation implements FunctionInterface {
-            public function invoke(String_ $origin): String_
-            {
-                return new String_(strtoupper($origin->get()));
-            }
-        })->setBindingParameterName('origin'));
+        $ffb1 = new Operation\Function_('ffb1');
+        $ffb1->setCallable(function (String_ $origin): String_ {
+            return new String_(strtoupper($origin->get()));
+        });
+        $ffb1->setBindingParameterName('origin');
+        Lodata::add($ffb1);
 
         $this->assertJsonResponse(
             (new Request)
@@ -306,13 +303,33 @@ class FunctionTest extends TestCase
         );
     }
 
+    public function test_callback_bound_internal_type()
+    {
+        $identity = new Operation\Function_('id');
+        $identity->setCallable(function (int $i): int {
+            return $i;
+        });
+        Lodata::add($identity);
+
+        $increment = new Operation\Function_('incr');
+        $increment->setCallable(function (int $a): int {
+            return $a + 1;
+        });
+        $increment->setBindingParameterName('a');
+        Lodata::add($increment);
+
+        $this->assertJsonResponse(
+            (new Request)
+                ->path('/id(i=1)/incr')
+        );
+    }
+
     public function test_void_callback()
     {
-        Lodata::add(new class('textv1') extends Operation implements FunctionInterface {
-            public function invoke(): void
-            {
-            }
+        $textv1 = new Operation\Function_('textv1');
+        $textv1->setCallable(function (): void {
         });
+        Lodata::add($textv1);
 
         $this->assertInternalServerError(
             (new Request)
@@ -322,11 +339,10 @@ class FunctionTest extends TestCase
 
     public function test_default_null_callback()
     {
-        Lodata::add(new class('textv1') extends Operation implements FunctionInterface {
-            public function invoke()
-            {
-            }
+        $textv1 = new Operation\Function_('textv1');
+        $textv1->setCallable(function () {
         });
+        Lodata::add($textv1);
 
         $this->assertInternalServerError(
             (new Request)
@@ -336,12 +352,11 @@ class FunctionTest extends TestCase
 
     public function test_string_callback()
     {
-        Lodata::add(new class('stringv1') extends Operation implements FunctionInterface {
-            public function invoke(): string
-            {
-                return 'hello world';
-            }
+        $stringv1 = new Operation\Function_('stringv1');
+        $stringv1->setCallable(function (): string {
+            return 'hello world';
         });
+        Lodata::add($stringv1);
 
         $this->assertMetadataDocuments();
 
@@ -353,12 +368,11 @@ class FunctionTest extends TestCase
 
     public function test_int_callback()
     {
-        Lodata::add(new class('intv1') extends Operation implements FunctionInterface {
-            public function invoke(): int
-            {
-                return 4;
-            }
+        $intv1 = new Operation\Function_('intv1');
+        $intv1->setCallable(function (): int {
+            return 4;
         });
+        Lodata::add($intv1);
 
         $this->assertMetadataDocuments();
 
@@ -370,12 +384,11 @@ class FunctionTest extends TestCase
 
     public function test_float_callback()
     {
-        Lodata::add(new class('floatv1') extends Operation implements FunctionInterface {
-            public function invoke(): float
-            {
-                return 0.1;
-            }
+        $floatv1 = new Operation\Function_('floatv1');
+        $floatv1->setCallable(function (): float {
+            return 0.1;
         });
+        Lodata::add($floatv1);
 
         $this->assertMetadataDocuments();
 
@@ -387,12 +400,11 @@ class FunctionTest extends TestCase
 
     public function test_boolean_callback()
     {
-        Lodata::add(new class('booleanv1') extends Operation implements FunctionInterface {
-            public function invoke(): bool
-            {
-                return true;
-            }
+        $booleanv1 = new Operation\Function_('booleanv1');
+        $booleanv1->setCallable(function (): bool {
+            return true;
         });
+        Lodata::add($booleanv1);
 
         $this->assertMetadataDocuments();
 
@@ -404,11 +416,10 @@ class FunctionTest extends TestCase
 
     public function test_bad_null_argument()
     {
-        Lodata::add(new class('textv1') extends Operation implements FunctionInterface {
-            public function invoke(String_ $a)
-            {
-            }
+        $textv1 = new Operation\Function_('textv1');
+        $textv1->setCallable(function (String_ $a) {
         });
+        Lodata::add($textv1);
 
         $this->assertBadRequest(
             (new Request)
@@ -418,11 +429,10 @@ class FunctionTest extends TestCase
 
     public function test_bad_argument_type()
     {
-        Lodata::add(new class('textv1') extends Operation implements FunctionInterface {
-            public function invoke(String_ $a)
-            {
-            }
+        $textv1 = new Operation\Function_('textv1');
+        $textv1->setCallable(function (String_ $a) {
         });
+        Lodata::add($textv1);
 
         $this->assertBadRequest(
             (new Request)
@@ -432,12 +442,11 @@ class FunctionTest extends TestCase
 
     public function test_string_argument()
     {
-        Lodata::add(new class('stringv1') extends Operation implements FunctionInterface {
-            public function invoke(string $arg): string
-            {
-                return $arg;
-            }
+        $stringv1 = new Operation\Function_('stringv1');
+        $stringv1->setCallable(function (string $arg): string {
+            return $arg;
         });
+        Lodata::add($stringv1);
 
         $this->assertMetadataDocuments();
 
@@ -449,12 +458,11 @@ class FunctionTest extends TestCase
 
     public function test_int_argument()
     {
-        Lodata::add(new class('intv1') extends Operation implements FunctionInterface {
-            public function invoke(int $arg): int
-            {
-                return $arg;
-            }
+        $intv1 = new Operation\Function_('intv1');
+        $intv1->setCallable(function (int $arg): int {
+            return $arg;
         });
+        Lodata::add($intv1);
 
         $this->assertMetadataDocuments();
 
@@ -466,12 +474,11 @@ class FunctionTest extends TestCase
 
     public function test_float_argument()
     {
-        Lodata::add(new class('floatv1') extends Operation implements FunctionInterface {
-            public function invoke(float $arg): float
-            {
-                return $arg;
-            }
+        $floatv1 = new Operation\Function_('floatv1');
+        $floatv1->setCallable(function (float $arg): float {
+            return $arg;
         });
+        Lodata::add($floatv1);
 
         $this->assertMetadataDocuments();
 
@@ -483,12 +490,11 @@ class FunctionTest extends TestCase
 
     public function test_boolean_argument()
     {
-        Lodata::add(new class('booleanv1') extends Operation implements FunctionInterface {
-            public function invoke(bool $arg): bool
-            {
-                return $arg;
-            }
+        $booleanv1 = new Operation\Function_('booleanv1');
+        $booleanv1->setCallable(function (bool $arg): bool {
+            return $arg;
         });
+        Lodata::add($booleanv1);
 
         $this->assertMetadataDocuments();
 
@@ -500,12 +506,11 @@ class FunctionTest extends TestCase
 
     public function test_null_argument()
     {
-        Lodata::add(new class('booleanv1') extends Operation implements FunctionInterface {
-            public function invoke(string $a, ?bool $arg, string $b): string
-            {
-                return $a.$b;
-            }
+        $booleanv1 = new Operation\Function_('booleanv1');
+        $booleanv1->setCallable(function (string $a, ?bool $arg, string $b): string {
+            return $a.$b;
         });
+        Lodata::add($booleanv1);
 
         $this->assertMetadataDocuments();
 

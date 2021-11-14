@@ -9,6 +9,7 @@ use Flat3\Lodata\Exception\Internal\LexerException;
 use Flat3\Lodata\Helper\Constants;
 use Flat3\Lodata\Primitive;
 use Flat3\Lodata\Type;
+use Illuminate\Support\Arr;
 
 /**
  * Lexer
@@ -770,6 +771,32 @@ class Lexer
         }
 
         return implode('', $chars);
+    }
+
+    public function operationParameters(): array
+    {
+        try {
+            $parameters = $this->matchingParenthesis();
+        } catch (LexerException $e) {
+            return [];
+        }
+
+        return Arr::collapse(array_map(function ($pair) {
+            $pair = trim($pair);
+
+            $kv = array_map('trim', explode('=', $pair));
+
+            if (count($kv) !== 2) {
+                throw new LexerException(
+                    'invalid_parameters',
+                    'The lexer encountered an error when parsing the parameters',
+                );
+            }
+
+            list($key, $value) = $kv;
+
+            return [$key => $value];
+        }, array_filter(explode(',', $parameters))));
     }
 
     /**

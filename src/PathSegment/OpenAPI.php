@@ -290,7 +290,8 @@ DESC, [
          * @var Operation $operation
          */
         foreach (Lodata::getResources()->sliceByClass(Operation::class) as $operation) {
-            $boundParameter = $operation->getBoundParameter();
+            $boundParameterName = $operation->getBindingParameterName();
+            $boundParameter = $operation->getCallableArguments()[$boundParameterName] ?? null;
             $pathItemObject = (object) [];
 
             switch (true) {
@@ -298,8 +299,8 @@ DESC, [
                     $paths->{'/'.$operation->getName()} = $pathItemObject;
                     break;
 
-                case $boundParameter instanceof EntitySet:
-                    $paths->{"/{$boundParameter->getName()}/{$operation->getName()}()"} = $pathItemObject;
+                case $boundParameter instanceof Operation\EntitySetArgument:
+                    $paths->{"/{$boundParameterName}/{$operation->getName()}()"} = $pathItemObject;
                     break;
             }
 
@@ -322,15 +323,15 @@ DESC, [
             $tags[] = __('Service Operations');
             $tags[] = $operation->getName();
 
-            if ($boundParameter) {
-                $tags[] = $boundParameter->getName();
+            if ($boundParameterName) {
+                $tags[] = $boundParameterName;
             }
 
             $parameters = [];
 
             $returnType = $operation->getReturnType();
 
-            foreach ($operation->getExternalArguments() as $argument) {
+            foreach ($operation->getMetadataArguments() as $argument) {
                 $tags[] = $argument->getName();
 
                 $parameters[] = [
@@ -341,7 +342,7 @@ DESC, [
                 ];
             }
 
-            $queryObject->tags = $tags;
+            $queryObject->tags = $this->uniq($tags);
             $queryObject->parameters = $parameters;
 
             $responses = [];
@@ -762,7 +763,7 @@ DESC, [
             $queryObject->summary = __('Get entities from :name', ['name' => $entitySet->getName()]);
         }
 
-        $queryObject->tags = $tags;
+        $queryObject->tags = $this->uniq($tags);
 
         $parameters = [];
 
@@ -857,7 +858,7 @@ DESC, [
             $operationObject->summary = __('Add new entity to :name', ['name' => $entitySet->getName()]);
         }
 
-        $operationObject->tags = $tags;
+        $operationObject->tags = $this->uniq($tags);
 
         $requestBody = [
             'required' => true,
@@ -995,5 +996,10 @@ DESC, [
             'required' => true,
             'schema' => $key->getType()->toOpenAPISchema(),
         ];
+    }
+
+    protected function uniq(array $values): array
+    {
+        return array_values(array_unique($values));
     }
 }

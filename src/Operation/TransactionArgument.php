@@ -30,4 +30,8 @@ class TransactionArgument extends Argument
 
         return $source;
     }
+
+    public function assertValidParameter($parameter): void
+    {
+    }
 }

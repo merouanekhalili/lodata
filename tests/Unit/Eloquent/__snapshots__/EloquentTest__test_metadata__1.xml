@@ -66,7 +66,15 @@
               <PropertyValue Property="Supported" Bool="true"/>
             </Record>
           </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.DeepInsertSupport">
+            <Record>
+              <PropertyValue Property="Supported" Bool="true"/>
+              <PropertyValue Property="ContentIDSupported" Bool="true"/>
+            </Record>
+          </Annotation>
         </EntitySet>
+        <FunctionImport Name="op1" Function="com.example.odata.op1"/>
+        <FunctionImport Name="op2" Function="com.example.odata.op2"/>
         <EntitySet Name="Flights" EntityType="com.example.odata.Flight">
           <NavigationPropertyBinding Path="passengers" Target="Passengers"/>
           <NavigationPropertyBinding Path="originAirport" Target="Airports"/>
@@ -123,6 +131,12 @@
           <Annotation Term="Org.OData.Capabilities.V1.SelectSupport">
             <Record>
               <PropertyValue Property="Supported" Bool="true"/>
+            </Record>
+          </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.DeepInsertSupport">
+            <Record>
+              <PropertyValue Property="Supported" Bool="true"/>
+              <PropertyValue Property="ContentIDSupported" Bool="true"/>
             </Record>
           </Annotation>
         </EntitySet>
@@ -182,6 +196,12 @@
               <PropertyValue Property="Supported" Bool="true"/>
             </Record>
           </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.DeepInsertSupport">
+            <Record>
+              <PropertyValue Property="Supported" Bool="true"/>
+              <PropertyValue Property="ContentIDSupported" Bool="true"/>
+            </Record>
+          </Annotation>
         </EntitySet>
         <EntitySet Name="Passengers" EntityType="com.example.odata.Passenger">
           <NavigationPropertyBinding Path="flight" Target="Flights"/>
@@ -239,6 +259,12 @@
           <Annotation Term="Org.OData.Capabilities.V1.SelectSupport">
             <Record>
               <PropertyValue Property="Supported" Bool="true"/>
+            </Record>
+          </Annotation>
+          <Annotation Term="Org.OData.Capabilities.V1.DeepInsertSupport">
+            <Record>
+              <PropertyValue Property="Supported" Bool="true"/>
+              <PropertyValue Property="ContentIDSupported" Bool="true"/>
             </Record>
           </Annotation>
         </EntitySet>
@@ -309,6 +335,13 @@
         <NavigationProperty Name="originAirport" Type="com.example.odata.Airport" Nullable="true"/>
         <NavigationProperty Name="destinationAirport" Type="com.example.odata.Airport" Nullable="true"/>
       </EntityType>
+      <Function Name="op1" IsBound="false">
+        <ReturnType Type="Edm.String" Nullable="true"/>
+      </Function>
+      <Function Name="op2" IsBound="false">
+        <Parameter Name="prefix" Type="Edm.String" Nullable="false"/>
+        <ReturnType Type="Edm.String" Nullable="false"/>
+      </Function>
       <Annotations Target="com.example.odata.DefaultContainer">
         <Annotation Term="Org.OData.Core.V1.ConventionalIDs" Bool="true"/>
         <Annotation Term="Org.OData.Core.V1.DefaultNamespace" Bool="true"/>

@@ -49,6 +49,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static Model drop(Identifier|string $key) Drop a named resource or type from the model
  * @method static string getNamespace() Get the namespace of this model
  * @method static EloquentEntitySet discoverEloquentModel(string $class) Discover the Eloquent model provided as a class name
+ * @method static Model discoverOperations(string $class) Discover operations on the provided class
  * @method static string getEndpoint() Get the REST endpoint of this model
  * @method static string getOdcUrl(Identifier|string $set) Get the Office Data Connection URL of the provided entity set
  * @method static string getPbidsUrl() Get the PowerBI discovery URL of this service

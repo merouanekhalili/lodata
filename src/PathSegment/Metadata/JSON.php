@@ -155,13 +155,13 @@ class JSON extends Metadata implements ResponseInterface, JsonInterface
                     break;
 
                 case $resource instanceof Operation:
-                    $isBound = null !== $resource->getBindingParameterName();
+                    $isBound = $resource->isBound();
 
                     $schema->{$resource->getResolvedName($namespace)} = $resourceElement;
                     $resourceElement->{'$Kind'} = $resource->getKind();
                     $resourceElement->{'$IsBound'} = $isBound;
 
-                    $arguments = $resource->getExternalArguments();
+                    $arguments = $resource->getMetadataArguments();
 
                     if ($arguments) {
                         $argumentsElement = [];
