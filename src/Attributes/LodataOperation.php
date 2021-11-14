@@ -11,7 +11,7 @@ use Flat3\Lodata\Type;
 use Illuminate\Database\Eloquent\Model;
 
 #[Attribute]
-abstract class LodataOperation
+class LodataOperation
 {
     const operationClass = null;
 

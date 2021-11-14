@@ -5,6 +5,10 @@ namespace Flat3\Lodata\Tests\Models;
 use Flat3\Lodata\Attributes\LodataFunction;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property string $name
+ * @property string $code
+ */
 class Airport extends Model
 {
     public $timestamps = false;
